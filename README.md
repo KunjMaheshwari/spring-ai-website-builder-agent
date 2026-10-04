@@ -1,90 +1,241 @@
-# 🍅 Tomato Support — AI Customer Support Assistant
+# 🍅 Tomato Support — Agentic AI Customer Support Assistant
 
-An AI-powered customer support assistant for **Tomato**, a food delivery application. Built with **Java, Spring Boot, Spring AI, and OpenRouter**, with a responsive HTML/CSS/JavaScript chat interface.
+An **Agentic AI customer support application** built with **Java, Spring Boot, Spring AI, and OpenRouter**.
+
+The project started as an AI-powered customer support assistant and has evolved into a practical exploration of **LLM tool calling, multi-tool orchestration, and Agentic AI systems**.
+
+The application can use external tools for calculations, live weather lookup, and currency exchange instead of relying only on the model's internal knowledge.
 
 ## 📸 Application Preview
 
-![Tomato Support UI](screenshots/tomato-support.png)
+![Tomato Support](screenshots/tomato-support.png)
 
-## ✨ Features
+## 🧩 Current Project Structure
 
-- 🤖 AI-powered customer support using Spring AI
-- 🍅 Responsive Tomato-themed chat interface
-- 💬 Conversational customer support
-- 📦 Food ordering and order-related assistance
-- 💰 Refund and cancellation assistance
-- 🚚 Order tracking and delivery-status queries
-- 📋 Tomato policy-related assistance
-- 🛡️ Restricts unrelated queries
-- 💡 Empathetic responses for frustrated customers
-- 🔐 API key managed through environment variables
-- 📱 Responsive desktop, tablet, and mobile UI
+The project currently includes three Spring AI tools:
 
-## 🏗️ Tech Stack
+- 🧮 `CalculatorTool`
+- 🌦️ `WeatherTool`
+- 💱 `CurrencyExchangeTool`
 
-| Layer | Technology |
-|---|---|
-| Backend | Java, Spring Boot |
-| AI Integration | Spring AI |
-| LLM Provider | OpenRouter |
-| Frontend | HTML, CSS, JavaScript |
-| Build Tool | Maven |
-| API | REST |
-| Version Control | Git & GitHub |
+![Project Structure](screenshots/project-structure.png)
 
-## 🧠 Architecture
+## 🚀 Current Capabilities
+
+### 🧮 Calculator Tool
+
+Used for arithmetic operations such as addition, subtraction, multiplication, and division.
+
+The LLM is instructed to use the calculator tool for arithmetic instead of calculating directly.
+
+### 🌦️ Live Weather Tool
+
+Uses the **OpenWeather API** to retrieve live weather information for a city.
+
+The tool can retrieve temperature, feels-like temperature, humidity, weather condition, and wind speed.
+
+### 💱 Currency Exchange Tool
+
+Uses the **Frankfurter API** to retrieve the latest exchange rate between two currencies.
+
+Examples include:
+
+```text
+INR → USD
+USD → INR
+INR → EUR
+```
+
+## 🤖 Tool Calling
+
+The project demonstrates how an LLM can decide when it needs an external tool.
 
 ```text
 User
-  │
-  ▼
-Tomato Support Web UI
-  │
-  │ POST /api/chat
-  ▼
-Spring Boot REST Controller
-  │
-  ▼
-SummarizeService
-  │
-  │ System Prompt + Conversation History
-  ▼
-Spring AI ChatClient
-  │
-  ▼
-OpenRouter
-  │
-  ▼
-AI Model
-  │
-  ▼
-Customer Support Response
+  ↓
+LLM
+  ↓
+Select Tool
+  ↓
+Execute Tool
+  ↓
+Observe Result
+  ↓
+LLM
+  ↓
+Final Response
 ```
 
-## 🔑 Environment Configuration
+The model can also call multiple tools for a single request.
 
-The OpenRouter API key is **not stored in the source code**.
+## 🔄 Multi-Tool Orchestration
 
-`application.properties` uses an environment variable:
+A single request can require multiple weather, currency, and calculator calls.
+
+For example:
+
+1. Get weather for multiple cities.
+2. Get multiple exchange rates.
+3. Perform multiple calculations.
+4. Use retrieved exchange-rate data in a calculation.
+5. Combine all results into one response.
+
+This demonstrates the basic Agentic AI loop:
+
+```text
+Goal
+ ↓
+Decide
+ ↓
+Act
+ ↓
+Observe
+ ↓
+Decide
+ ↓
+Act
+ ↓
+Observe
+ ↓
+Final Response
+```
+
+## 📊 Multi-Tool Test
+
+The agent was tested through Postman with a request requiring multiple weather, currency, and calculator tool calls.
+
+![Postman Multi-Tool Results](screenshots/postman-results.png)
+
+The test successfully demonstrated:
+
+- `WeatherTool` called multiple times
+- `CurrencyExchangeTool` called multiple times
+- `CalculatorTool` called multiple times
+- Tool results combined into a final response
+- Live weather and exchange-rate information used in the final response
+
+## 🧠 System Prompt
+
+The agent is instructed to use the appropriate external tool instead of inventing information:
+
+```text
+You are a helpful AI assistant with access to external tools.
+
+Follow these rules:
+1. For arithmetic calculations, ALWAYS use the calculator tool.
+2. For current weather, ALWAYS use the currentWeather tool.
+3. For currency conversion or exchange rates, ALWAYS use the currency exchange tool.
+4. You may call multiple tools when solving a multi-step request.
+5. After receiving tool results, explain the answer naturally.
+6. Never invent current weather or exchange-rate information.
+```
+
+## 🏗️ Architecture
+
+```text
+                         ┌──────────────────┐
+                         │      User        │
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+                         ┌──────────────────┐
+                         │   Spring Boot    │
+                         │    REST API      │
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+                         ┌──────────────────┐
+                         │    Spring AI     │
+                         │    ChatClient    │
+                         └────────┬─────────┘
+                                  │
+                            Tool Selection
+                                  │
+              ┌───────────────────┼───────────────────┐
+              ▼                   ▼                   ▼
+       ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+       │ Calculator  │     │   Weather   │     │  Currency   │
+       │    Tool     │     │    Tool     │     │    Tool     │
+       └─────────────┘     └─────────────┘     └─────────────┘
+              │                   │                   │
+              └───────────────────┼───────────────────┘
+                                  ▼
+                         ┌──────────────────┐
+                         │   Tool Results   │
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+                         ┌──────────────────┐
+                         │       LLM        │
+                         │ Observe → Decide │
+                         │ → Act → Observe  │
+                         └──────────────────┘
+```
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
+|---|---|
+| Language | Java |
+| Backend | Spring Boot |
+| AI Framework | Spring AI |
+| LLM Provider | OpenRouter |
+| Weather API | OpenWeather |
+| Currency API | Frankfurter |
+| Frontend | HTML, CSS, JavaScript |
+| Build Tool | Maven |
+| API Testing | Postman |
+| Version Control | Git & GitHub |
+
+## 📂 Project Structure
+
+```text
+FDE/
+├── screenshots/
+│   ├── project-structure.png
+│   ├── postman-results.png
+│   └── tomato-support.png
+├── src/
+│   └── main/
+│       ├── java/
+│       │   └── org/example/
+│       │       ├── aiTools/
+│       │       │   ├── CalculatorTool.java
+│       │       │   ├── CurrencyExchangeTool.java
+│       │       │   └── WeatherTool.java
+│       │       ├── Main.java
+│       │       ├── SummarizeController.java
+│       │       └── SummarizeService.java
+│       └── resources/
+│           ├── application.properties
+│           └── static/
+│               ├── index.html
+│               ├── style.css
+│               └── script.js
+├── .gitignore
+├── pom.xml
+└── README.md
+```
+
+## 🔐 Environment Variables
+
+API keys are **not stored in source code**.
 
 ```properties
-spring.application.name=FDE
-spring.ai.openai.base-url=https://openrouter.ai/api/v1
 spring.ai.openai.api-key=${OPENROUTER_API_KEY}
-spring.ai.openai.chat.options.model=openrouter/free
+weather.api.key=${OPENWEATHER_API_KEY}
 ```
 
-Set the API key before starting the application.
-
-### macOS / Linux
+Configure them in IntelliJ or your shell:
 
 ```bash
 export OPENROUTER_API_KEY="YOUR_OPENROUTER_API_KEY"
+export OPENWEATHER_API_KEY="YOUR_OPENWEATHER_API_KEY"
 ```
 
-Or configure `OPENROUTER_API_KEY` in the IntelliJ IDEA Run Configuration.
+Frankfurter does not require an API key for the current integration.
 
-> Never commit your actual API key to GitHub.
+> Never commit API keys or other secrets to GitHub.
 
 ## 🚀 Getting Started
 
@@ -95,17 +246,14 @@ git clone https://github.com/KunjMaheshwari/Customer-Support-Assistant.git
 cd Customer-Support-Assistant
 ```
 
-### 2. Configure the API key
-
-Set:
+### 2. Configure environment variables
 
 ```text
 OPENROUTER_API_KEY=YOUR_OPENROUTER_API_KEY
+OPENWEATHER_API_KEY=YOUR_OPENWEATHER_API_KEY
 ```
 
 ### 3. Run the application
-
-Using Maven:
 
 ```bash
 ./mvnw spring-boot:run
@@ -115,29 +263,19 @@ Or run the `Main` class from IntelliJ IDEA.
 
 ### 4. Open the application
 
-Visit:
-
 ```text
 http://localhost:8080
 ```
 
-The frontend is served by Spring Boot from:
-
-```text
-src/main/resources/static/
-```
-
 ## 🔌 API
 
-### Chat
-
-**Endpoint**
+### Chat Endpoint
 
 ```http
 POST /api/chat
 ```
 
-**Request**
+Request:
 
 ```http
 Content-Type: text/plain
@@ -146,73 +284,70 @@ Content-Type: text/plain
 Example:
 
 ```text
-How can I request a refund?
+What's the weather in Vidisha?
 ```
 
-**Response**
+The LLM determines whether a tool is required and invokes the appropriate tool.
+
+## 🎯 What This Project Demonstrates
+
+- Why an LLM cannot directly perform external actions
+- LLM = Brain, Tools = Hands
+- Tools and Function Calling
+- Natural Language → Structured Tool Calls
+- Tool Calling with Spring AI
+- Calculator Tool
+- Live Weather Tool
+- Currency Conversion Tool
+- Multiple Tool Calls for a Single Request
+- The Tool Calling Loop
+- Information Tools vs Action Tools
+- When an LLM becomes an AI Agent
+- AI Agents vs Workflows
+- Goal → Decide → Act → Observe
+- Tool permissions and security
+- Practical Agentic AI architecture
+
+## 🔮 Next Step: AI Website Builder Agent
+
+The next stage is to extend the tool-calling architecture into an **AI Website Builder Agent**.
+
+Planned file-system tools:
+
+- `createDirectory`
+- `writeFile`
+- `readFile`
+- `listFiles`
+
+The agent will be designed around:
 
 ```text
-I understand you'd like to request a refund...
+User Goal
+   ↓
+Plan
+   ↓
+Create Directory
+   ↓
+Write Files
+   ↓
+Read Files
+   ↓
+List Files
+   ↓
+Observe Results
+   ↓
+Modify / Continue
+   ↓
+Complete Website
 ```
 
-## 🎯 Supported Queries
+Security considerations will include:
 
-The assistant is designed to handle:
-
-- Food ordering
-- Order status
-- Delivery tracking
-- Refunds
-- Cancellations
-- Delivery issues
-- Tomato policies
-
-For unrelated questions, it responds with:
-
-> I'm sorry, I can only assist with Tomato's food ordering, order, refund, tracking, and policy-related queries.
-
-## 🔒 Security
-
-- API credentials are supplied through environment variables.
-- Secrets are excluded from version control.
-- `.env` files are ignored through `.gitignore`.
-- API keys should never be committed to the repository.
-
-## 📂 Project Structure
-
-```text
-Customer-Support-Assistant/
-├── .gitignore
-├── README.md
-├── pom.xml
-└── src/
-    └── main/
-        ├── java/
-        │   └── org/example/
-        │       ├── Main.java
-        │       ├── SummarizeController.java
-        │       └── SummarizeService.java
-        └── resources/
-            ├── application.properties
-            └── static/
-                ├── index.html
-                ├── style.css
-                └── script.js
-```
-
-## 🔮 Future Improvements
-
-- Persistent conversation history per user/session
-- Database-backed chat history
-- Authentication and user accounts
-- Order-management API integration
-- Real-time order tracking
-- RAG for Tomato policies
-- Vector database for semantic search
-- Streaming AI responses
-- Automated unit and integration tests
-- Docker deployment
-- Cloud deployment
+- Agent sandboxing
+- Path traversal protection
+- Tool permissions
+- Safe file-system access
+- Human-in-the-loop controls
 
 ## 👨‍💻 Author
 
@@ -222,4 +357,4 @@ GitHub: [KunjMaheshwari](https://github.com/KunjMaheshwari)
 
 ---
 
-⭐ If you found this project interesting, consider giving the repository a star!
+⭐ If you find this project interesting, consider giving the repository a star.
