@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+            name="description"
+            content="Tomato Support - AI powered customer support"
+    >
+
+    <title>Tomato Support</title>
+
+    <link
+            rel="stylesheet"
+            href="style.css"
+    >
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ================= HEADER ================= -->
+
+    <header class="header">
+
+        <div class="header-content">
+
+            <div class="brand">
+
+                <div class="logo">
+                    🍅
+                </div>
+
+                <div class="brand-text">
+
+                    <h1>
+                        Tomato Support
+                    </h1>
+
+                    <p>
+                        Customer Support Assistant
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="status">
+
+                <span class="status-dot"></span>
+
+                <span>
+                    Online
+                </span>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= CHAT AREA ================= -->
+
+    <main class="chat-container">
+
+        <div class="chat-content">
+
+            <!-- Date -->
+
+            <div class="date-divider">
+                <span>Today</span>
+            </div>
+
+
+            <!-- Welcome Message -->
+
+            <div class="message-row bot-row">
+
+                <div class="avatar bot-avatar">
+                    🍅
+                </div>
+
+                <div class="message-wrapper">
+
+                    <div class="sender-name">
+                        Tomato Support
+                    </div>
+
+                    <div class="message bot-message">
+
+                        <p>
+                            Hi! Welcome to Tomato Support 🍅
+                        </p>
+
+                        <p>
+                            How can I help you with your order today?
+                        </p>
+
+                    </div>
+
+                    <div class="message-time">
+                        Just now
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Messages will be added here by JavaScript -->
+
+            <div id="chatMessages"></div>
+
+        </div>
+
+    </main>
+
+
+    <!-- ================= INPUT AREA ================= -->
+
+    <footer class="input-section">
+
+        <div class="input-container">
+
+            <form
+                    id="chatForm"
+                    class="chat-form"
+            >
+
+                <div class="input-wrapper">
+
+                    <input
+                            id="messageInput"
+                            type="text"
+                            placeholder="Type your message..."
+                            autocomplete="off"
+                            maxlength="1000"
+                    >
+
+                    <span
+                            id="characterCount"
+                            class="character-count"
+                    >
+                        0/1000
+                    </span>
+
+                </div>
+
+                <button
+                        id="sendButton"
+                        type="submit"
+                        class="send-button"
+                >
+
+                    <span class="send-text">
+                        Send
+                    </span>
+
+                    <span class="send-icon">
+                        ➤
+                    </span>
+
+                </button>
+
+            </form>
+
+            <div class="input-hint">
+                Tomato Support can help with orders, refunds, tracking and policies.
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- ================= TOAST ================= -->
+
+    <div
+            id="toast"
+            class="toast"
+    ></div>
+
+</div>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
