@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -20,13 +21,18 @@
             rel="stylesheet"
             href="style.css"
     >
+
 </head>
+
 
 <body>
 
 <div class="app">
 
-    <!-- ================= HEADER ================= -->
+
+    <!-- =================================================
+         HEADER
+    ================================================== -->
 
     <header class="header">
 
@@ -34,7 +40,10 @@
 
             <div class="brand">
 
-                <div class="logo">
+                <div
+                        class="logo"
+                        aria-hidden="true"
+                >
                     🍅
                 </div>
 
@@ -52,9 +61,16 @@
 
             </div>
 
-            <div class="status">
 
-                <span class="status-dot"></span>
+            <div
+                    class="status"
+                    aria-label="Tomato Support is online"
+            >
+
+                <span
+                        class="status-dot"
+                        aria-hidden="true"
+                ></span>
 
                 <span>
                     Online
@@ -67,32 +83,47 @@
     </header>
 
 
-    <!-- ================= CHAT AREA ================= -->
 
-    <main class="chat-container">
+    <!-- =================================================
+         CHAT AREA
+    ================================================== -->
+
+    <main
+            class="chat-container"
+            aria-label="Tomato Support conversation"
+    >
 
         <div class="chat-content">
 
-            <!-- Date -->
+
+            <!-- ================= DATE ================= -->
 
             <div class="date-divider">
-                <span>Today</span>
+                <span>
+                    Today
+                </span>
             </div>
 
 
-            <!-- Welcome Message -->
+
+            <!-- ================= WELCOME MESSAGE ================= -->
 
             <div class="message-row bot-row">
 
-                <div class="avatar bot-avatar">
+                <div
+                        class="avatar bot-avatar"
+                        aria-hidden="true"
+                >
                     🍅
                 </div>
+
 
                 <div class="message-wrapper">
 
                     <div class="sender-name">
                         Tomato Support
                     </div>
+
 
                     <div class="message bot-message">
 
@@ -106,6 +137,7 @@
 
                     </div>
 
+
                     <div class="message-time">
                         Just now
                     </div>
@@ -115,24 +147,42 @@
             </div>
 
 
-            <!-- Messages will be added here by JavaScript -->
 
-            <div id="chatMessages"></div>
+            <!-- =================================================
+                 DYNAMIC CHAT MESSAGES
+
+                 JavaScript will append:
+                 - User messages
+                 - Typing indicator
+                 - Streaming AI response
+            ================================================== -->
+
+            <div
+                    id="chatMessages"
+                    aria-live="polite"
+                    aria-atomic="false"
+            ></div>
+
 
         </div>
 
     </main>
 
 
-    <!-- ================= INPUT AREA ================= -->
+
+    <!-- =================================================
+         INPUT AREA
+    ================================================== -->
 
     <footer class="input-section">
 
         <div class="input-container">
 
+
             <form
                     id="chatForm"
                     class="chat-form"
+                    autocomplete="off"
             >
 
                 <div class="input-wrapper">
@@ -143,28 +193,37 @@
                             placeholder="Type your message..."
                             autocomplete="off"
                             maxlength="1000"
+                            aria-label="Type your message"
+                            required
                     >
+
 
                     <span
                             id="characterCount"
                             class="character-count"
+                            aria-live="polite"
                     >
                         0/1000
                     </span>
 
                 </div>
 
+
                 <button
                         id="sendButton"
                         type="submit"
                         class="send-button"
+                        aria-label="Send message"
                 >
 
                     <span class="send-text">
                         Send
                     </span>
 
-                    <span class="send-icon">
+                    <span
+                            class="send-icon"
+                            aria-hidden="true"
+                    >
                         ➤
                     </span>
 
@@ -172,8 +231,12 @@
 
             </form>
 
+
             <div class="input-hint">
-                Tomato Support can help with orders, refunds, tracking and policies.
+
+                Tomato Support can help with
+                orders, refunds, tracking and policies.
+
             </div>
 
         </div>
@@ -181,17 +244,29 @@
     </footer>
 
 
-    <!-- ================= TOAST ================= -->
+
+    <!-- =================================================
+         TOAST NOTIFICATION
+    ================================================== -->
 
     <div
             id="toast"
             class="toast"
+            role="alert"
+            aria-live="assertive"
     ></div>
+
 
 </div>
 
 
+
+<!-- =================================================
+     JAVASCRIPT
+================================================== -->
+
 <script src="script.js"></script>
+
 
 </body>
 

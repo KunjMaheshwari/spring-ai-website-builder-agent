@@ -6,6 +6,11 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+
+    <!-- =====================================================
+         SPRING BOOT
+    ====================================================== -->
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -13,58 +18,142 @@
         <relativePath/>
     </parent>
 
+
+    <!-- =====================================================
+         PROJECT INFORMATION
+    ====================================================== -->
+
     <groupId>org.example</groupId>
+
     <artifactId>FDE</artifactId>
+
     <version>1.0-SNAPSHOT</version>
 
+
+    <!-- =====================================================
+         PROPERTIES
+    ====================================================== -->
+
     <properties>
+
         <java.version>17</java.version>
+
         <spring-ai.version>2.0.0</spring-ai.version>
+
     </properties>
 
-    <!-- Spring AI BOM -->
+
+    <!-- =====================================================
+         SPRING AI BOM
+    ====================================================== -->
+
     <dependencyManagement>
+
         <dependencies>
+
             <dependency>
+
                 <groupId>org.springframework.ai</groupId>
+
                 <artifactId>spring-ai-bom</artifactId>
+
                 <version>${spring-ai.version}</version>
+
                 <type>pom</type>
+
                 <scope>import</scope>
+
             </dependency>
+
         </dependencies>
+
     </dependencyManagement>
+
+
+    <!-- =====================================================
+         DEPENDENCIES
+    ====================================================== -->
 
     <dependencies>
 
-        <!-- Spring AI OpenAI-compatible client -->
+
+        <!-- =================================================
+             SPRING AI
+        ================================================== -->
+
+        <!--
+             Spring AI OpenAI-compatible client.
+
+             Used for communicating with your
+             OpenAI-compatible model provider.
+        -->
+
         <dependency>
+
             <groupId>org.springframework.ai</groupId>
+
             <artifactId>spring-ai-starter-model-openai</artifactId>
+
         </dependency>
 
-        <!-- Spring Web -->
+
+        <!-- =================================================
+             SPRING WEBFLUX
+        ================================================== -->
+
+        <!--
+             WebFlux is used because the application
+             returns Flux<String> from the chat endpoint.
+
+             This enables reactive HTTP streaming.
+        -->
+
         <dependency>
+
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+
+            <artifactId>spring-boot-starter-webflux</artifactId>
+
         </dependency>
 
-        <!-- Testing -->
+
+        <!-- =================================================
+             TESTING
+        ================================================== -->
+
         <dependency>
+
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+
+            <artifactId>spring-boot-starter-webflux-test</artifactId>
+
             <scope>test</scope>
+
         </dependency>
+
 
     </dependencies>
 
+
+    <!-- =====================================================
+         BUILD
+    ====================================================== -->
+
     <build>
+
         <plugins>
+
             <plugin>
+
                 <groupId>org.springframework.boot</groupId>
+
                 <artifactId>spring-boot-maven-plugin</artifactId>
+
             </plugin>
+
         </plugins>
+
     </build>
+
 
 </project>

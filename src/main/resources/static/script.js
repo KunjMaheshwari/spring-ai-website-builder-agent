@@ -77,7 +77,7 @@ function scrollToBottom() {
             behavior: "smooth"
         });
 
-    }, 50);
+    }, 30);
 
 }
 
@@ -124,10 +124,10 @@ function addUserMessage(text) {
 
 
 /* =====================================================
-   ADD BOT MESSAGE
+   CREATE BOT MESSAGE
 ===================================================== */
 
-function addBotMessage(text) {
+function createBotMessage() {
 
     const row =
         document.createElement("div");
@@ -148,9 +148,10 @@ function addBotMessage(text) {
                 Tomato Support
             </div>
 
-            <div class="message bot-message">
-                ${escapeHtml(text)}
-            </div>
+            <div
+                class="message bot-message"
+                aria-live="polite"
+            ></div>
 
             <div class="message-time">
                 ${getCurrentTime()}
@@ -164,6 +165,11 @@ function addBotMessage(text) {
     chatMessages.appendChild(row);
 
     scrollToBottom();
+
+
+    return row.querySelector(
+        ".bot-message"
+    );
 
 }
 
@@ -274,6 +280,175 @@ function showToast(message) {
 
 
 /* =====================================================
+   STREAM AI RESPONSE
+===================================================== */
+
+async function streamResponse(
+    response,
+    messageElement
+) {
+
+    /*
+     * Make sure the browser received
+     * a readable response body.
+     */
+
+    if (!response.body) {
+
+        throw new Error(
+            "Response body does not support streaming."
+        );
+
+    }
+
+
+    /*
+     * Get the stream reader.
+     */
+
+    const reader =
+        response.body.getReader();
+
+
+    /*
+     * Decoder converts incoming
+     * bytes into UTF-8 text.
+     */
+
+    const decoder =
+        new TextDecoder("utf-8");
+
+
+    let fullResponse = "";
+
+
+    console.log(
+        "🚀 AI response streaming started"
+    );
+
+
+    /*
+     * Read the response chunk by chunk.
+     */
+
+    while (true) {
+
+        const {
+            value,
+            done
+        } = await reader.read();
+
+
+        /*
+         * Stream is finished.
+         */
+
+        if (done) {
+
+            break;
+
+        }
+
+
+        /*
+         * Convert received bytes
+         * into text.
+         */
+
+        const chunk =
+            decoder.decode(
+                value,
+                {
+                    stream: true
+                }
+            );
+
+
+        console.log(
+            "📦 Received chunk:",
+            JSON.stringify(chunk)
+        );
+
+
+        /*
+         * Ignore empty chunks.
+         */
+
+        if (!chunk) {
+
+            continue;
+
+        }
+
+
+        /*
+         * Add the new chunk to
+         * the complete response.
+         */
+
+        fullResponse += chunk;
+
+
+        /*
+         * Update the message immediately.
+         */
+
+        messageElement.textContent =
+            fullResponse;
+
+
+        /*
+         * Give the browser an opportunity
+         * to paint the updated message.
+         */
+
+        await new Promise(resolve => {
+
+            requestAnimationFrame(resolve);
+
+        });
+
+
+        /*
+         * Keep the latest response visible.
+         */
+
+        scrollToBottom();
+
+    }
+
+
+    /*
+     * Flush any remaining bytes
+     * from the decoder.
+     */
+
+    const remaining =
+        decoder.decode();
+
+
+    if (remaining) {
+
+        fullResponse +=
+            remaining;
+
+        messageElement.textContent =
+            fullResponse;
+
+    }
+
+
+    console.log(
+        "✅ AI response streaming completed"
+    );
+
+
+    return fullResponse;
+
+}
+
+
+/* =====================================================
    SEND MESSAGE
 ===================================================== */
 
@@ -284,11 +459,17 @@ chatForm.addEventListener(
         event.preventDefault();
 
 
+        /* ---------------------------------------------
+           GET USER MESSAGE
+        --------------------------------------------- */
+
         const message =
             messageInput.value.trim();
 
 
-        /* Empty message */
+        /*
+         * Don't send empty messages.
+         */
 
         if (!message) {
 
@@ -297,7 +478,9 @@ chatForm.addEventListener(
         }
 
 
-        /* Disable UI */
+        /* ---------------------------------------------
+           DISABLE UI
+        --------------------------------------------- */
 
         messageInput.disabled =
             true;
@@ -306,20 +489,27 @@ chatForm.addEventListener(
             true;
 
 
-        /* Display user message */
+        /* ---------------------------------------------
+           DISPLAY USER MESSAGE
+        --------------------------------------------- */
 
         addUserMessage(message);
 
 
-        /* Clear input */
+        /* ---------------------------------------------
+           CLEAR INPUT
+        --------------------------------------------- */
 
-        messageInput.value = "";
+        messageInput.value =
+            "";
 
         characterCount.textContent =
             "0/1000";
 
 
-        /* Show typing */
+        /* ---------------------------------------------
+           SHOW TYPING INDICATOR
+        --------------------------------------------- */
 
         showTypingIndicator();
 
@@ -327,21 +517,14 @@ chatForm.addEventListener(
         try {
 
             console.log(
-                "Sending message:",
+                "📤 Sending message:",
                 message
             );
 
 
-            /*
-             * Your Spring Boot controller is:
-             *
-             * @PostMapping("/chat")
-             * public String chat(
-             *     @RequestBody String message
-             * )
-             *
-             * Therefore we send plain text.
-             */
+            /* =========================================
+               CALL SPRING BOOT API
+            ========================================= */
 
             const response =
                 await fetch(
@@ -350,14 +533,28 @@ chatForm.addEventListener(
                         method: "POST",
 
                         headers: {
+
                             "Content-Type":
+                                "text/plain",
+
+                            /*
+                             * Backend is returning a
+                             * streamed text response.
+                             */
+                            "Accept":
                                 "text/plain"
+
                         },
 
-                        body: message
+                        body:
+                        message
                     }
                 );
 
+
+            /* =========================================
+               LOG RESPONSE
+            ========================================= */
 
             console.log(
                 "HTTP Status:",
@@ -365,7 +562,17 @@ chatForm.addEventListener(
             );
 
 
-            /* HTTP error */
+            console.log(
+                "Response Content-Type:",
+                response.headers.get(
+                    "content-type"
+                )
+            );
+
+
+            /* =========================================
+               CHECK HTTP ERROR
+            ========================================= */
 
             if (!response.ok) {
 
@@ -376,56 +583,84 @@ chatForm.addEventListener(
             }
 
 
-            /*
-             * Your Spring Boot controller
-             * returns String.
-             */
-
-            const aiResponse =
-                await response.text();
-
-
-            console.log(
-                "AI Response:",
-                aiResponse
-            );
-
-
-            /* Remove typing */
+            /* =========================================
+               REMOVE TYPING INDICATOR
+            ========================================= */
 
             removeTypingIndicator();
 
 
-            /* Show AI response */
+            /* =========================================
+               CREATE EMPTY BOT MESSAGE
+            ========================================= */
 
-            addBotMessage(
+            const messageElement =
+                createBotMessage();
+
+
+            /* =========================================
+               START STREAMING
+            ========================================= */
+
+            const aiResponse =
+                await streamResponse(
+                    response,
+                    messageElement
+                );
+
+
+            console.log(
+                "🤖 Complete AI response:",
                 aiResponse
             );
 
+        }
 
-        } catch (error) {
+
+            /* =============================================
+               ERROR HANDLING
+            ============================================= */
+
+        catch (error) {
 
             console.error(
-                "Chat API Error:",
+                "❌ Chat API Error:",
                 error
             );
 
 
+            /*
+             * Remove typing indicator.
+             */
+
             removeTypingIndicator();
 
+
+            /*
+             * Display error message.
+             */
 
             addBotMessage(
                 "I'm sorry, I couldn't connect to Tomato Support right now. Please try again."
             );
 
 
+            /*
+             * Display toast.
+             */
+
             showToast(
                 "Unable to connect to the server."
             );
 
-        } finally {
+        }
 
-            /* Enable UI */
+
+            /* =============================================
+               RE-ENABLE UI
+            ============================================= */
+
+        finally {
 
             messageInput.disabled =
                 false;
@@ -434,7 +669,9 @@ chatForm.addEventListener(
                 false;
 
 
-            /* Focus input */
+            /*
+             * Focus input again.
+             */
 
             messageInput.focus();
 
@@ -442,6 +679,53 @@ chatForm.addEventListener(
 
     }
 );
+
+
+/* =====================================================
+   ADD BOT MESSAGE
+   Used for error messages and
+   non-streaming messages.
+===================================================== */
+
+function addBotMessage(text) {
+
+    const row =
+        document.createElement("div");
+
+    row.className =
+        "message-row bot-row";
+
+
+    row.innerHTML = `
+
+        <div class="avatar bot-avatar">
+            🍅
+        </div>
+
+        <div class="message-wrapper">
+
+            <div class="sender-name">
+                Tomato Support
+            </div>
+
+            <div class="message bot-message">
+                ${escapeHtml(text)}
+            </div>
+
+            <div class="message-time">
+                ${getCurrentTime()}
+            </div>
+
+        </div>
+
+    `;
+
+
+    chatMessages.appendChild(row);
+
+    scrollToBottom();
+
+}
 
 
 /* =====================================================
@@ -455,8 +739,8 @@ messageInput.addEventListener(
         /*
          * Enter sends the message.
          *
-         * Shift + Enter can be used later
-         * if you want multiline messages.
+         * Shift + Enter can be used
+         * for multiline messages.
          */
 
         if (
